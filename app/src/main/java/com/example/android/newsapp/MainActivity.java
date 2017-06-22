@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.newsapp.utilities.Key;
 import com.example.android.newsapp.utilities.NetworkUtils;
 import com.example.android.newsapp.utilities.openNewsJsonUtil;
 import com.squareup.picasso.Picasso;
@@ -18,7 +19,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class
+
+MainActivity extends AppCompatActivity {
 
     private TextView mNewsdisplay;
 
@@ -43,8 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void search()
     {
+        String n= Key.key_value;
 
-        String key= "80e52a38d8704706a5fae794366e4acd";
+        String key= n;
 
         new fetchNews().execute(key);
 
