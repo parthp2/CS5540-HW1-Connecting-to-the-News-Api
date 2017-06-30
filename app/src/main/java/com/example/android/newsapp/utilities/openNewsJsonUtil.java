@@ -2,11 +2,14 @@ package com.example.android.newsapp.utilities;
 
 import android.content.Context;
 
+import com.example.android.newsapp.Model.News;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.jar.JarException;
 
@@ -17,11 +20,11 @@ import java.util.jar.JarException;
 public class openNewsJsonUtil
 {
 
-    public static String[] getSimpleNewsJson(Context context, String NewsJsonString)
+    public static ArrayList<News> getSimpleNewsJson(Context context, String NewsJsonString)
             throws JSONException
     {
 
-        String[] parsenewsdata=null;
+        ArrayList<News> parsenewsdata=new ArrayList<>();
 
         JSONObject newsjason=new JSONObject(NewsJsonString);
 
@@ -55,7 +58,6 @@ public class openNewsJsonUtil
 
         JSONArray news=newsjason.getJSONArray(TAG_ARTICLES);
 
-        parsenewsdata =new String[news.length()];
 
         for(int i=0; i<news.length();i++)
         {
@@ -72,8 +74,9 @@ public class openNewsJsonUtil
             image=n.getString(TAG_IMAGE);
             publish=n.getString(TAG_PUBLISH);
 
+            News nw=new News(auther,title,desc,url,image,publish);
 
-            parsenewsdata[i]= auther +"\n\n "+ title + "\n\n" +desc+ "\n\n" +url+ "\n\n" +image+ "\n\n" + publish;
+           parsenewsdata.add(nw);
 
         }
 

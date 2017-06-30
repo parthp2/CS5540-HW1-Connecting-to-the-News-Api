@@ -1,14 +1,20 @@
 package com.example.android.newsapp;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.android.newsapp.Model.News;
 import com.example.android.newsapp.utilities.Key;
 import com.example.android.newsapp.utilities.NetworkUtils;
 import com.example.android.newsapp.utilities.openNewsJsonUtil;
@@ -16,6 +22,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +30,9 @@ public class
 
 MainActivity extends AppCompatActivity {
 
-    private TextView mNewsdisplay;
+    static final String TAG = "mainactivity";
+
+    private RecyclerView mRecyclerView;
 
     private  TextView errorMessage;
 
@@ -34,14 +43,19 @@ MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mNewsdisplay =(TextView) findViewById(R.id.news_id) ;
-
-        mNewsdisplay.setText("Click On Search Button for news !");
+        mRecyclerView =(RecyclerView) findViewById(R.id.recyclerview_news);
 
 
         progressBar =(ProgressBar) findViewById(R.id.pb_loader);
 
         errorMessage =(TextView) findViewById(R.id.error_message);
+
+        LinearLayoutManager layoutManager=new LinearLayoutManager(this);
+
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
+
     }
 
     private void search()
@@ -58,17 +72,17 @@ MainActivity extends AppCompatActivity {
     private void  showJsondata()
     {
         errorMessage.setVisibility(View.INVISIBLE);
-        mNewsdisplay.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void showerror()
     {
         errorMessage.setVisibility(View.VISIBLE);
-        mNewsdisplay.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
     }
 
 
-    public  class fetchNews extends AsyncTask<String ,Void ,String[]>
+    public  class fetchNews extends AsyncTask<String ,Void ,ArrayList<News>>
     {
         @Override
         protected void onPreExecute()
@@ -78,7 +92,7 @@ MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String[] doInBackground(String... param)
+        protected ArrayList<News> doInBackground(String... param)
         {
             if(param.length == 0)
             {
@@ -93,9 +107,7 @@ MainActivity extends AppCompatActivity {
             try{
                 String JsonNewsData = NetworkUtils.getResponseFromHttpUrl(newsurl);
 
-               String[] simpleNeWsJson= openNewsJsonUtil.getSimpleNewsJson(MainActivity.this,JsonNewsData);
-
-
+               ArrayList<News> simpleNeWsJson= openNewsJsonUtil.getSimpleNewsJson(MainActivity.this,JsonNewsData);
 
                 return simpleNeWsJson;
             }
@@ -109,7 +121,7 @@ MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected  void onPostExecute(String[] newsdata)
+        protected  void onPostExecute(final ArrayList<News> newsdata)
         {
             progressBar.setVisibility(View.INVISIBLE);
 
@@ -117,11 +129,17 @@ MainActivity extends AppCompatActivity {
             {
 
                 showJsondata();
-                mNewsdisplay.setText("");
-                for(String news: newsdata)
-                {
-                    mNewsdisplay.append((news)+ "\n-------------------------------------------------\n\n");
-                }
+
+                NewsAdapter adapter = new NewsAdapter(newsdata, new NewsAdapter.ItemClickListener() {
+                    @Override
+                    public void onItemClick(int clickedItemIndex) {
+                        String url = newsdata.get(clickedItemIndex).getUrl();
+
+                        Log.d(TAG, String.format("Url %s", url));
+                        openWebPage(url);
+                    }
+                });
+                mRecyclerView.setAdapter(adapter);
 
             }
             else
@@ -151,5 +169,14 @@ MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openWebPage(String url) {
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null)
+        {
+            startActivity(intent);
+        }
     }
 }
